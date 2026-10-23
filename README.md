@@ -27,7 +27,7 @@ A rolling sum implemented once against `Indicator`:
 
 ```rust
 use core::convert::Infallible;
-use nova_core::{Indicator, Window};
+use nova_ta_core::{Indicator, Window};
 
 struct Sum {
     window: Window<f64>,
@@ -75,11 +75,9 @@ An indicator consumes one sample per `update` call and keeps its own state, so i
 
 ## Installation
 
-`nova-core` is not yet published on crates.io. Until it is, depend on it by path:
-
 ```toml
 [dependencies]
-nova-core = { path = "../nova-core" }
+nova-ta-core = "0.1.0"
 ```
 
 ## Multi-language goal and Chipa-Flow
@@ -92,7 +90,6 @@ Nova is being built for [Chipa](https://chipaeditor.com), in particular the new 
 
 Nova is free to use in personal, commercial, and closed-source projects. If you use it in something you're building, we'd love to hear about it. Share your project name or a link if you're comfortable doing so — it helps us understand how Nova is used in the real world and where we can improve.
 
-<<<<<<< HEAD
 No fees, no obligations, and no need to share proprietary details.
 
 ## Help and community
@@ -101,7 +98,4 @@ Questions or feedback? Join the [Nova Discord](https://discord.gg/QwKmaaeW56).
 
 ## License
 
-Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or [MIT license](LICENSE-MIT) at your option.
-=======
-No fees, no obligations, and no need to share proprietary details.
->>>>>>> e40a7003eb1e2bec44a7ad25c3b1423ffdf79eac
+Licensed under [MIT license](LICENSE-MIT).
