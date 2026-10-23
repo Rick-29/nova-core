@@ -47,9 +47,6 @@ pub trait Real: Num {
     /// values outside their range.
     fn from_f64(x: f64) -> Result<Self, Self::Error>;
 
-    /// Converts `self` to the nearest `f64`. May lose precision.
-    fn to_f64(self) -> f64;
-
     /// Returns `e` raised to the power `self`.
     ///
     /// # Errors
@@ -97,9 +94,6 @@ impl Real for f64 {
     fn from_f64(x: f64) -> Result<Self, Self::Error> {
         Ok(x)
     }
-    fn to_f64(self) -> f64 {
-        self
-    }
     fn exp(self) -> Result<Self, Self::Error> {
         Ok(f64::exp(self))
     }
@@ -136,7 +130,6 @@ mod tests {
     }
     impl Real for Wrap {
         fn from_f64(x: f64) -> Result<Self, Self::Error> { Ok(Wrap(x)) }
-        fn to_f64(self) -> f64 { self.0 }
         fn exp(self) -> Result<Self, Self::Error> { Ok(Wrap(self.0.exp())) }
         fn ln(self) -> Result<Self, Self::Error> { Ok(Wrap(self.0.ln())) }
     }
@@ -150,12 +143,6 @@ mod tests {
         let x = Wrap(5.0);
         let ln = one.eml(one.eml(x).unwrap().eml(one).unwrap()).unwrap();
         assert!((ln.0 - 5.0_f64.ln()).abs() < 1e-12);
-    }
-
-    #[test]
-    fn f64_round_trip() {
-        assert_eq!(Wrap::from_f64(0.25).unwrap().to_f64(), 0.25);
-        assert_eq!(<f64 as Real>::from_f64(1.5).unwrap().to_f64(), 1.5);
     }
 
     #[test]
