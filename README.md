@@ -1,3 +1,4 @@
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/nova-dark-text.jpg">
@@ -5,7 +6,9 @@
   </picture>
 </p>
 
+[![Discord](https://img.shields.io/badge/Discord-Join%20the%20community-5865F2?logo=discord&logoColor=white)](https://discord.gg/QwKmaaeW56)
 # nova-core
+
 
 Core traits and state primitives for streaming technical-analysis indicators in Rust.
 
@@ -90,3 +93,11 @@ Nova is being built for [Chipa](https://chipaeditor.com), in particular the new 
 Nova is free to use in personal, commercial, and closed-source projects. If you use it in something you're building, we'd love to hear about it. Share your project name or a link if you're comfortable doing so — it helps us understand how Nova is used in the real world and where we can improve.
 
 No fees, no obligations, and no need to share proprietary details.
+
+## Help and community
+
+Questions or feedback? Join the [Nova Discord](https://discord.gg/QwKmaaeW56).
+
+## License
+
+Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or [MIT license](LICENSE-MIT) at your option.
