@@ -25,9 +25,11 @@
 //!   `Option` on the hot path.
 
 mod num;
+mod real;
 mod window;
 
 pub use num::Num;
+pub use real::Real;
 pub use window::Window;
 
 /// A streaming indicator: it consumes one sample at a time and owns its state.

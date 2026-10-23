@@ -85,6 +85,14 @@ pub trait Num: Copy + PartialOrd {
     }
 }
 
+pub trait Real: Num {
+    fn from_f64(x: f64) -> Result<Self, Self::Error>;  // required: float in
+    fn exp(self) -> Result<Self, Self::Error>;         // required
+    fn ln(self)  -> Result<Self, Self::Error>;         // required
+
+    // defaults, overridable: eml, powf, log
+}
+
 /// `f64` backend with plain IEEE 754 semantics. Operations never return
 /// `Err`: `x / 0.0` yields infinity or NaN, and `sqrt` of a negative number
 /// yields NaN. Callers are responsible for not feeding non-finite inputs.
@@ -117,5 +125,21 @@ impl Num for f64 {
     }
     fn neg(self) -> Self {
         -self
+    }
+}
+
+
+/// More advanced version of Num to allow conversions from f64 to T
+impl Real for f64 {
+    fn from_f64(x: f64) -> Result<Self, Self::Error> {
+        Ok(x)
+    }
+
+    fn exp(self) -> Result<Self, Self::Error> {
+        Ok(self.exp())
+    }
+
+    fn ln(self)  -> Result<Self, Self::Error> {
+        Ok(self.ln())
     }
 }
