@@ -76,14 +76,20 @@ impl<T> Window<T> {
         }
     }
 
-    /// Iterates over the retained samples from oldest to newest.
-    pub fn iter(&self) -> impl Iterator<Item = &T> {
+    /// Iterates from oldest to newest.
+    pub fn iter(&self) -> impl DoubleEndedIterator<Item = &T> {
         let (older, newer) = if self.buf.len() < self.cap {
             (&self.buf[..], &[][..])
         } else {
             (&self.buf[self.next..], &self.buf[..self.next])
         };
+
         older.iter().chain(newer.iter())
+    }
+
+    /// Iterates from newest to oldest.
+    pub fn rev_iter(&self) -> impl DoubleEndedIterator<Item = &T> {
+        self.iter().rev()
     }
 
     /// Removes all samples. The capacity is unchanged.
@@ -91,4 +97,42 @@ impl<T> Window<T> {
         self.buf.clear();
         self.next = 0;
     }
+
+    /// Returns the newest retained sample.
+    pub fn newest(&self) -> Option<&T> {
+        self.rev_iter().next()
+    }
+
+    /// Returns the sample `lag` positions before the newest sample.
+    ///
+    /// `lag = 0` returns the newest sample.
+    /// Returns `None` if `lag >= self.len()`.
+    pub fn get_from_newest(&self, lag: usize) -> Option<&T> {
+        if lag >= self.len() {
+            return None;
+        }
+    
+        let index = if self.is_full() {
+            (self.next + self.cap - 1 - lag) % self.cap
+        } else {
+            self.buf.len() - 1 - lag
+        };
+    
+        self.buf.get(index)
+    }
+    /// Returns the sample at a chronological index.
+    ///
+    /// Index 0 is the oldest retained sample.
+    pub fn get(&self, index: usize) -> Option<&T> {
+        if index >= self.len() {
+            return None;
+        }
+
+        if !self.is_full() {
+            Some(&self.buf[index])
+        } else {
+            Some(&self.buf[(self.next + index) % self.cap])
+        }
+    }
+
 }

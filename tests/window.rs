@@ -68,3 +68,34 @@ fn clear_restarts_from_empty() {
 fn zero_capacity_is_a_construction_bug() {
     let _ = Window::<i32>::new(0);
 }
+
+#[test]
+fn iterators_preserve_order_after_wraparound() {
+    let mut window = Window::new(3);
+
+    window.push(10);
+    window.push(20);
+    window.push(30);
+
+    assert_eq!(
+        window.iter().copied().collect::<Vec<_>>(),
+        vec![10, 20, 30]
+    );
+
+    assert_eq!(
+        window.rev_iter().copied().collect::<Vec<_>>(),
+        vec![30, 20, 10]
+    );
+
+    assert_eq!(window.push(40), Some(10));
+
+    assert_eq!(
+        window.iter().copied().collect::<Vec<_>>(),
+        vec![20, 30, 40]
+    );
+
+    assert_eq!(
+        window.rev_iter().copied().collect::<Vec<_>>(),
+        vec![40, 30, 20]
+    );
+}
