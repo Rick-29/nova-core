@@ -6,7 +6,7 @@
 /// # Example
 ///
 /// ```
-/// use nova_core::Window;
+/// use nova_ta_core::Window;
 ///
 /// let mut w = Window::new(2);
 /// assert_eq!(w.push(1), None);

@@ -21,7 +21,7 @@
 /// # Example
 ///
 /// ```
-/// use nova_core::Num;
+/// use nova_ta_core::Num;
 ///
 /// fn mean<N: Num>(a: N, b: N) -> Result<N, N::Error> {
 ///     a.add(b)?.div(N::from_usize(2))

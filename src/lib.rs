@@ -54,7 +54,7 @@ pub use window::Window;
 /// A running sum over the last `n` samples, built on [`Window`]:
 ///
 /// ```
-/// use nova_core::{Indicator, Window};
+/// use nova_ta_core::{Indicator, Window};
 /// use core::convert::Infallible;
 ///
 /// struct Sum {
@@ -133,7 +133,7 @@ pub trait Indicator {
 /// # Example
 ///
 /// ```
-/// use nova_core::Ohlc;
+/// use nova_ta_core::Ohlc;
 ///
 /// let bar = Ohlc::prices(10.0, 12.0, 9.5, 11.0);
 /// assert_eq!(bar.close, 11.0);
