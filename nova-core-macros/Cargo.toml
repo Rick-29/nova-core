@@ -1,0 +1,21 @@
+[package]
+name = "nova-core-macros"
+version = "0.1.0"
+edition = "2024"
+description = "Procedural macros for nova-ta-core: fallible Num arithmetic written as infix expressions."
+license = "MIT"
+homepage = "https://gitlab.chipatrade.com/Rick-29/nova-core"
+repository = "https://gitlab.chipatrade.com/Rick-29/nova-core"
+documentation = "https://docs.rs/nova-core-macros"
+readme = "README.md"
+keywords = ["technical-analysis", "proc-macro", "macros", "arithmetic"]
+categories = ["development-tools::procedural-macro-helpers", "finance"]
+
+[lib]
+proc-macro = true
+
+[dependencies]
+zyn = { version = "0.5.4", features = ["ext"] }
+
+[dev-dependencies]
+nova-ta-core = { path = ".." }

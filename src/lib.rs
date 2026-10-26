@@ -9,6 +9,8 @@
 //!   for `f64`.
 //! - [`Ohlc`]: a candle with prices, volume and timestamp.
 //! - [`Window`]: a fixed-capacity rolling buffer.
+//! - [`math_support!`] / [`math_impl!`]: macros that write fallible [`Num`]
+//!   arithmetic as ordinary infix expressions.
 //!
 //! The crate contains no concrete indicators.
 //!
@@ -23,6 +25,67 @@
 //! - **Warm-up is a query.** `update` always returns a value and
 //!   [`Indicator::ready`] says when it is meaningful, so there is no
 //!   `Option` on the hot path.
+//!
+//! # Writing arithmetic with `math_support!`
+//!
+//! Every [`Num`] operation returns a `Result`, so a formula such as
+//! `(n * xy - x * y) / (n * x2 - x * x)` turns into a pile of nested
+//! `add(&mul(..)?, ..)?` calls. [`math_support!`] defines a local macro that
+//! lets you write the formula directly:
+//!
+//! ```
+//! use nova_ta_core::{Num, math_support};
+//!
+//! #[derive(Debug, PartialEq)]
+//! enum MyError {
+//!     Number(String),
+//! }
+//!
+//! impl MyError {
+//!     fn number(e: impl core::fmt::Debug) -> Self {
+//!         MyError::Number(format!("{e:?}"))
+//!     }
+//! }
+//!
+//! // Defines `math!`, bound to the number type `T` and the error mapper.
+//! math_support!(math, MyError::number, T);
+//!
+//! fn slope<T: Num>(n: usize, xy: T, x: T, y: T, x2: T) -> Result<T, MyError> {
+//!     let n = T::from_usize(n);
+//!     Ok(math!((n * xy - x * y) / (n * x2 - x * x)))
+//! }
+//!
+//! assert_eq!(slope(2, 5.0, 3.0, 4.0, 5.0), Ok(-2.0));
+//! ```
+//!
+//! The generated macro expands to a plain `T`, with a `?` after every
+//! operation. Use it inside a function that returns `Result`, usually wrapped
+//! as `Ok(math!(..))`. Rules:
+//!
+//! - **Operators.** `+`, `-`, `*`, `/`, unary `-` and parentheses, with the
+//!   usual precedence. Binary operators call [`Num::add`], [`Num::sub`],
+//!   [`Num::mul`] and [`Num::div`], and each error goes through the mapper
+//!   before `?`. Unary `-` calls the infallible [`Num::neg`]. Anything else
+//!   is a compile error.
+//! - **Operands.** Any expression that evaluates to `T`: variables, fields,
+//!   indexing, function and method calls. [`Num`] is `Copy`, so no `&` is
+//!   needed.
+//! - **`usize` values.** A macro cannot see types, so mark them. Integer
+//!   literals and `expr as usize` become [`Num::from_usize`], and the inner
+//!   `usize` expression stays ordinary Rust: `math!(a * 2 + 1)` and
+//!   `math!((n * (n + 1) / 2) as usize)`. Float literals are rejected.
+//! - **Error mapper.** `math_support!(name, mapper, Type)` takes any
+//!   expression usable as `map_err(mapper)`, for example `MyError::number`
+//!   or [`core::convert::identity`] when the caller already uses
+//!   `T::Error`.
+//! - **Type.** Resolved where `name!` is used, so it can be a generic
+//!   parameter such as `T`, or a concrete type such as `f64`.
+//!
+//! [`math_impl!`] is the underlying macro,
+//! `math_impl!(mapper, Type, expr)`. Prefer [`math_support!`] unless you need
+//! a different mapper or type for a single expression.
+
+pub use nova_core_macros::{math_impl, math_support};
 
 mod num;
 mod real;
