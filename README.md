@@ -18,8 +18,10 @@ Core traits and state primitives for streaming technical-analysis indicators in 
 | --- | --- |
 | `Indicator` | Stateful, incremental computation: `update`, `ready`, `reset`. |
 | `Num` | Numeric abstraction with fallible arithmetic; implemented for `f64`. |
+| `Real` | `Num` plus `from_f64`, `exp`, `ln`, `sin`, `cos`, `powf`, `log` and the constants `pi`, `e`, `tau`, `ln_2`; implemented for `f64`. |
 | `Ohlc<N>` | A candle: open, high, low, close, volume and timestamp. |
 | `Window<T>` | Fixed-capacity rolling buffer that returns the evicted sample on push. |
+| `math_support!` / `real_support!` | Macros that write fallible `Num` / `Real` formulas as ordinary infix expressions. |
 
 ## Example
 
@@ -63,6 +65,32 @@ for price in [1.0, 2.0, 3.0, 4.0] {
     println!("{value} (ready: {})", sum.ready());
 }
 ```
+
+## Writing formulas with macros
+
+Every `Num` and `Real` operation returns a `Result`, so a formula normally becomes a chain of nested calls with `?`. `math_support!` and `real_support!` define a local macro that lets you write it as plain math, mapping every error with the function you give and propagating it with `?`:
+
+```rust
+use nova_ta_core::{Num, Real, math_support, real_support};
+
+math_support!(math, MyError::number, T);
+real_support!(real, MyError::number, T);
+
+fn slope<T: Num>(n: T, xy: T, x: T, y: T, x2: T) -> Result<T, MyError> {
+    Ok(math!((n * xy - x * y) / (n * x2 - x * x)))
+}
+
+// Standard normal density.
+fn pdf<T: Real>(x: T) -> Result<T, MyError> {
+    Ok(real!(exp(-0.5 * x ** 2) / sqrt(2 * PI)))
+}
+```
+
+- `math!` supports `+ - * /`, unary `-`, integer literals, `expr as usize`, and `sqrt`, `abs`, `max`, `min`.
+- `real!` adds float literals, `expr as f64`, `**` (power, Python precedence), `exp`, `ln`, `sin`, `cos`, `pow`, `log`, `eml` and the constants `PI`, `E`, `TAU`, `LN_2`. Functions work as `f(x)` or `x.f()`.
+- Other function names are left alone and treated as operands.
+
+See the [`nova-core-macros` README](nova-core-macros/README.md) for the full rules.
 
 ## Incremental processing and warm-up
 

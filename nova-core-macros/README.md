@@ -35,10 +35,10 @@ fn line<T: Num>(m: T, n: usize, b: T) -> Result<T, MyError> {
   operators are a compile error.
 - Operands are any expression of type `T` (variables, fields, indexing, calls).
 - Integer literals and `expr as usize` become `Num::from_usize`; the inner
-  `usize` expression stays plain Rust. Float literals are rejected.
+  `usize` expression stays plain Rust. Float literals are rejected by `math!`
+  (use `real!`).
 - Binary operations map their error with the given mapper, then `?`. The macro
   evaluates to a plain `T`, so wrap it as `Ok(math!(..))`.
-
 - The `Num` functions `sqrt`, `abs`, `max`, `min` work as `sqrt(x)` or
   `x.sqrt()`. Unknown function names are left alone and used as operands.
 
@@ -47,7 +47,8 @@ fn line<T: Num>(m: T, n: usize, b: T) -> Result<T, MyError> {
 
 ## `real_support!`
 
-Same shape, for types implementing `Real`. Everything above plus:
+Same shape, for types implementing `Real` (`real_impl!(mapper, Type, expr)` is
+the one-shot form). It accepts everything `math!` does, plus:
 
 ```rust
 real_support!(real, MyError::number, T);
@@ -61,7 +62,7 @@ fn pdf<T: Real>(x: T) -> Result<T, MyError> {
 - `**` is `Real::powf`, binding tighter than `*`, `/` and unary `-` and
   right-associative (Python rules): `2 * x ** 2` is `2 * (x ** 2)`,
   `-x ** 2` is `-(x ** 2)`. `pow(x, p)` / `x.pow(p)` are the call forms.
-  Note that `rustfmt` prints `x ** 2` as `x * *2`; both parse the same.
+  `rustfmt` prints `x ** 2` inside macros as `x * *2`; both parse the same.
 - Functions `exp`, `ln`, `sin`, `cos`, `pow`, `log(x, base)`, `eml(x, y)`,
   as calls or methods.
 - Constants `PI`, `E`, `TAU`, `LN_2`.
