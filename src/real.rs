@@ -4,7 +4,8 @@ use crate::Num;
 /// and the natural logarithm.
 ///
 /// Implementors provide only [`from_f64`](Real::from_f64),
-/// [`to_f64`](Real::to_f64), [`exp`](Real::exp) and [`ln`](Real::ln). Every
+/// [`exp`](Real::exp), [`ln`](Real::ln),
+/// [`sin`](Real::sin) and [`cos`](Real::cos). Every
 /// other method has a default built from them (plus the [`Num`] operations)
 /// and can be overridden when a backend has a more accurate or faster
 /// version, as `f64` does.
@@ -60,6 +61,51 @@ pub trait Real: Num {
     /// `self <= 0`; `f64` follows IEEE (`-inf` / NaN).
     fn ln(self) -> Result<Self, Self::Error>;
 
+    /// Returns the sine of `self`, in radians.
+    ///
+    /// # Errors
+    /// Backend-defined. `f64` follows IEEE (NaN for infinities).
+    fn sin(self) -> Result<Self, Self::Error>;
+
+    /// Returns the cosine of `self`, in radians.
+    ///
+    /// # Errors
+    /// Backend-defined. `f64` follows IEEE (NaN for infinities).
+    fn cos(self) -> Result<Self, Self::Error>;
+
+    /// Returns π.
+    ///
+    /// The default converts [`core::f64::consts::PI`] with
+    /// [`from_f64`](Real::from_f64); override for a backend with more
+    /// precision than `f64`.
+    fn pi() -> Result<Self, Self::Error> {
+        Self::from_f64(core::f64::consts::PI)
+    }
+
+    /// Returns Euler's number `e`.
+    ///
+    /// The default converts [`core::f64::consts::E`]; override for more
+    /// precision.
+    fn e() -> Result<Self, Self::Error> {
+        Self::from_f64(core::f64::consts::E)
+    }
+
+    /// Returns τ, i.e. 2π.
+    ///
+    /// The default converts [`core::f64::consts::TAU`]; override for more
+    /// precision.
+    fn tau() -> Result<Self, Self::Error> {
+        Self::from_f64(core::f64::consts::TAU)
+    }
+
+    /// Returns the natural logarithm of 2.
+    ///
+    /// The default converts [`core::f64::consts::LN_2`]; override for more
+    /// precision.
+    fn ln_2() -> Result<Self, Self::Error> {
+        Self::from_f64(core::f64::consts::LN_2)
+    }
+
     /// Returns `exp(self) - ln(y)`.
     ///
     /// # Errors
@@ -100,6 +146,12 @@ impl Real for f64 {
     fn ln(self) -> Result<Self, Self::Error> {
         Ok(f64::ln(self))
     }
+    fn sin(self) -> Result<Self, Self::Error> {
+        Ok(f64::sin(self))
+    }
+    fn cos(self) -> Result<Self, Self::Error> {
+        Ok(f64::cos(self))
+    }
     fn powf(self, exp: Self) -> Result<Self, Self::Error> {
         Ok(f64::powf(self, exp))
     }
@@ -132,6 +184,19 @@ mod tests {
         fn from_f64(x: f64) -> Result<Self, Self::Error> { Ok(Wrap(x)) }
         fn exp(self) -> Result<Self, Self::Error> { Ok(Wrap(self.0.exp())) }
         fn ln(self) -> Result<Self, Self::Error> { Ok(Wrap(self.0.ln())) }
+        fn sin(self) -> Result<Self, Self::Error> { Ok(Wrap(self.0.sin())) }
+        fn cos(self) -> Result<Self, Self::Error> { Ok(Wrap(self.0.cos())) }
+    }
+
+    #[test]
+    fn constants_and_trig() {
+        assert_eq!(Wrap::pi().unwrap().0, core::f64::consts::PI);
+        assert_eq!(Wrap::e().unwrap().0, core::f64::consts::E);
+        assert_eq!(Wrap::tau().unwrap().0, core::f64::consts::TAU);
+        assert_eq!(Wrap::ln_2().unwrap().0, core::f64::consts::LN_2);
+        assert!(Wrap::pi().unwrap().sin().unwrap().0.abs() < 1e-12);
+        assert!((Wrap::pi().unwrap().cos().unwrap().0 + 1.0).abs() < 1e-12);
+        assert_eq!(<f64 as Real>::pi().unwrap(), core::f64::consts::PI);
     }
 
     #[test]

@@ -11,6 +11,8 @@
 //! - [`Window`]: a fixed-capacity rolling buffer.
 //! - [`math_support!`] / [`math_impl!`]: macros that write fallible [`Num`]
 //!   arithmetic as ordinary infix expressions.
+//! - [`real_support!`] / [`real_impl!`]: the same for [`Real`], adding float
+//!   literals, `**`, `exp`, `ln`, `sin`, `cos`, `log` and the constants.
 //!
 //! The crate contains no concrete indicators.
 //!
@@ -84,8 +86,48 @@
 //! [`math_impl!`] is the underlying macro,
 //! `math_impl!(mapper, Type, expr)`. Prefer [`math_support!`] unless you need
 //! a different mapper or type for a single expression.
+//!
+//! `math!` also accepts the [`Num`] functions `sqrt(x)`, `abs(x)`,
+//! `max(a, b)` and `min(a, b)`, written either as calls or as methods
+//! (`x.sqrt()`, `a.max(b)`).
+//!
+//! # Writing `Real` formulas with `real_support!`
+//!
+//! [`real_support!`] has the same shape and accepts everything `math!` does,
+//! plus the [`Real`] vocabulary:
+//!
+//! ```
+//! use nova_ta_core::{Real, real_support};
+//!
+//! real_support!(real, core::convert::identity, T);
+//!
+//! /// Standard normal density.
+//! fn pdf<T: Real>(x: T) -> Result<T, T::Error> {
+//!     Ok(real!(exp(-0.5 * x ** 2) / sqrt(2 * PI)))
+//! }
+//!
+//! assert!((pdf(0.0_f64).unwrap() - 0.3989422804014327).abs() < 1e-15);
+//! ```
+//!
+//! - **Float literals and `expr as f64`** become [`Real::from_f64`]; integer
+//!   literals and `expr as usize` are still [`Num::from_usize`].
+//! - **`**`** is [`Real::powf`]. It binds tighter than `*`, `/` and unary
+//!   `-` and is right-associative, as in Python: `2 * x ** 2` is
+//!   `2 * (x ** 2)` and `-x ** 2` is `-(x ** 2)`. `pow(x, p)` and
+//!   `x.pow(p)` are the same thing spelled as a call.
+//! - **Functions**: `exp`, `ln`, `sin`, `cos`, `pow`/`powf`, `log(x, base)`,
+//!   `eml(x, y)`, as calls or methods (`x.ln()`, `x.log(b)`). Arguments are
+//!   themselves `real!` expressions.
+//! - **Constants**: `PI`, `E`, `TAU`, `LN_2` call [`Real::pi`] and friends,
+//!   so a variable with one of those names is shadowed inside `real!`.
+//! - Unknown function names are left untouched and treated as operands, so
+//!   your own `fn half(x: T) -> T` still works inside the expression.
+//!
+//! [`real_impl!`] is the one-shot form, `real_impl!(mapper, Type, expr)`.
+//! Using a `Real`-only feature inside `math!` is a compile error pointing at
+//! the offending token.
 
-pub use nova_core_macros::{math_impl, math_support};
+pub use nova_core_macros::{math_impl, math_support, real_impl, real_support};
 
 mod num;
 mod real;
